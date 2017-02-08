@@ -50,5 +50,5 @@ class gzip:
 class aplib:   
 
     @classmethod
-    def decompresses(cls,data,s=0):
-        return _aplib.decompresses(data,s)
+    def decompress(cls,data,s=0):
+        return _aplib.decompress(data,s)

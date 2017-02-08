@@ -234,9 +234,9 @@ def unpack(data,s=0):
   return cout.raw[:n]
 
 
-def decompress(d):
+def decompress(d,s):
     try:
-        r=  a_decompress(StringIO.StringIO(d)).do()
+        r=  a_decompress(StringIO.StringIO(d)).do()[0]
     except IndexError:
-        r = unpack(d)
+        r = unpack(d,s)
     return r

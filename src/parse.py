@@ -1,3 +1,4 @@
+from copy import deepcopy
 chunks = lambda l, n: [l[x: x+n] for x in xrange(0, len(l), n)]
 
 def parse_pubkey_rsa(rsa_bin, ignore_len=False):

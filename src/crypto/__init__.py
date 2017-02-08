@@ -52,7 +52,7 @@ class aes:
 class rc4:
 
     @classmethod
-    def decrypt(cls,data, key,derive_key,xor=None,mod1=0,mod2=0):
+    def decrypt(cls,data, key,derive_key=None,xor=None,mod1=0,mod2=0):
 
         if derive_key:
             key = derive_key(key)
