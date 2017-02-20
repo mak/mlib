@@ -1,16 +1,18 @@
 import hashlib
+import operator
+import itertools
+import sys,struct
+
 from ctypes import cdll,c_buffer
 from Crypto.Cipher    import AES
 from Crypto.Cipher    import ARC4 as RC4
 from Crypto.Cipher    import PKCS1_v1_5
 from Crypto.PublicKey import RSA
-import itertools
-import sys,struct
-from mlib.misc import load_dll
 
+from mlib.misc import load_dll
 from . import rc6 as _rc6
 from . import rc2 as _rc2
-
+from . import spritz as _spritz
 
 
 chunks = lambda l, n: [l[x: x+n] for x in xrange(0, len(l), n)]
@@ -177,7 +179,32 @@ class rc6:
             r.append(ciph(d[i*16:(i+1)*16],k))
         return ''.join(r)
 
+class spritz:
 
+    _class = _spritz.Spritz(op=operator.xor)
+
+    @staticmethod
+    def mk_args(data,key):
+        xdata = data
+        xkey  = key
+        if type(data) != bytearray:
+            xdata = bytearray(xdata)
+
+        if type(xkey) != bytearray:
+            xkey = bytearray(xkey)
+        return xdata,xkey
+    
+    @classmethod
+    def decrypt(cls,data,key):
+        data,key = cls.mk_args(data,key)
+        return str(cls._class.decrypt(key,data))
+
+    @classmethod
+    def decrypt(cls,data,key):
+        data,key = cls.mk_args(data,key)
+        return str(cls._class.encrypt(key,data))
+
+    
 class serpent:
     LIB=load_dll('so/_serpent.so')
     BLOCK_SIZE = 16
