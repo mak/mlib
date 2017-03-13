@@ -9,4 +9,4 @@ def chunks(data, n):
 
 
 def ror(n, bits,b=32):
-    return rol(n, b - (b & bits),b)
+    return rol(n, b - bits,b)
