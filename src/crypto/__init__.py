@@ -105,8 +105,19 @@ def visDecry(datA):
     return ''.join(map(chr,ret))
 
 
-def xor(x,y):
-    return ''.join(map(lambda x: chr(ord(x[0])^ord(x[1])),zip(x,itertools.cycle(y))))
+def rolling_xor(d,key,rl=8,off=0,add_index=False,xor_index=False):
+    r = []
+    for i,c in enumerate(d):
+        a = ord(c)^key ^ (i if xor_index else 0)
+        r.append(chr(a&0xff))
+                         
+        key  = rol(key,rl) + off
+        if add_index:
+            key +=i
+    return ''.join(r)
+
+def xor(x,y,xor_index=False):
+    return ''.join(map(lambda a: chr(ord(a[1][0])^ord(a[1][1])^(a[0] if xor_index else 0)),enumerate(zip(x,itertools.cycle(y)))))
 
 class xtea:
 
