@@ -3,7 +3,7 @@
 from distutils.core import setup
 
 setup(name='mLib',
-      version='1.0',
+      version='1.1',
       description='Library contains functions commonly used in malware research',
       author='Maciej Kotowicz',
       author_email='mak@lokalhost.pl',

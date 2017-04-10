@@ -31,7 +31,10 @@ class M(object):
         r = self.b.read(n)
         self.b.seek(old_l,os.SEEK_SET)
         return r
-    
+
+    # def bytes(self,t):
+    #     s=  self.dword()
+    #     return self.read
     def __len__(self):
 	return self._len
 
