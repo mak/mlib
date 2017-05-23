@@ -1,20 +1,48 @@
 from copy import deepcopy
 chunks = lambda l, n: [l[x: x+n] for x in xrange(0, len(l), n)]
 
-def parse_pubkey_rsa(rsa_bin, ignore_len=False):
-    exh = rsa_bin.encode('hex')
-    if not rsa_bin[0] == "\x06":
-        return exh
-    #if struct.unpack('I',rsa_bin[4:8])[0] != 0x0000a400:
-    #    return exh
-    if rsa_bin[8:12] not in ['RSA1','RSA2']:
-        return exh
 
-    bits,e = struct.unpack('II',rsa_bin[12:20])
-    if not ignore_len and len(rsa_bin[20:]) != bits/8:
-        print 'nope'
-    n = str(int(rsa_bin[20:][::-1].encode('hex'),16))
-    return {'n':n,'e':e}
+class RSAKEY(object):
+
+    def __init__(self,d):
+        self.bin = d
+        self.off = 0 
+        self.bits = 0
+    def get_int(self,b):
+        r=long(self.bin[self.off:self.off+self.bits/b][::-1].encode('hex'),16)
+        self.off += self.bits/b
+        return r
+
+    def unpack(self):
+
+        if self.bin[0] not in ["\x06","\x07"]:
+            return None
+
+        if self.bin[8:12] not in ['RSA1','RSA2']:
+            return None
+        key = {}
+        priv = self.bin[0] == "\x07"
+        self.bits,key['e'] = struct.unpack('II',self.bin[12:20])
+        self.off = 20
+        key['n']= self.get_int(8)
+        if priv:
+            key['p1'] = self.get_int(16)
+            key['p2'] = self.get_int(16)
+            key['exp1'] = self.get_int(16)
+            key['exp2'] = self.get_int(16)
+            key['coeff'] = self.get_int(16)
+            key['d'] = self.get_int(8)
+            ko = RSA.construct((key['n'],long(key['e']),key['d']))
+        else:
+            ko = RSA.construct((key['n'],long(key['e'])))
+        return ko,key
+
+
+def parse_pubkey_rsa(rsa_bin, ignore_len=False):
+    r = RSAKEY(rsa_bin).unpack()
+    if not r:
+        return rsa_bin.encode('hex')
+    return r[1]
 
 def parse_key_ecc(ecc_bin):
     s, = struct.unpack('I',ecc_bin[:4])
