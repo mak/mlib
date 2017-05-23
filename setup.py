@@ -3,12 +3,12 @@
 from distutils.core import setup
 
 setup(name='mLib',
-      version='1.1',
+      version='1.1.2',
       description='Library contains functions commonly used in malware research',
       author='Maciej Kotowicz',
       author_email='mak@lokalhost.pl',
       url='https://github.com/mak/mlib',
       package_dir = {'mlib':'src'},
-      packages=['mlib','mlib.compression','mlib.crypto'],
+      packages=['mlib','mlib.compression','mlib.crypto','mlib.disasm'],
       package_data = {'mlib':['so/*so']}
      )
