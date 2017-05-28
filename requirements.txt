@@ -1,0 +1,4 @@
+pyasn1
+pycrypto
+bitarray
+capstone
