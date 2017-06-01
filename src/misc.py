@@ -57,16 +57,20 @@ def generic_unparse(data,do_rest=False):
         r.append("\n")
     return "\n".join(r)
 
-def _get_my_path():
-    my_path = os.path.abspath(os.path.expanduser(__file__))
+def realpath(p):
+    my_path = os.path.abspath(os.path.expanduser(p))
     if os.path.islink(my_path):
         my_path = os.readlink(my_path)
-    return os.path.dirname(os.path.dirname(my_path))
+    return my_path
 
+def realdir(p):
+    my_path = realpath(p)
+    return os.path.dirname(os.path.dirname(my_path))
+    
 def get_my_path():
     global BASEPATH
     if not BASEPATH:
-        BASEPATH = _get_my_path() + os.sep + __name__.split('.')[0]
+        BASEPATH = realdir(__file__) + os.sep + __name__.split('.')[0]
     return BASEPATH
 
 def generic_parse(_data):
