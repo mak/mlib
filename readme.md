@@ -41,9 +41,9 @@ Your bag of handy codez for malware researchers
  - parse - parse all the things! especially m$ crypto keys
  
  
-# Licene
+# License
 
-Do what ever you want with this,
+Do whatever you want with this,
 
 Just remember to credit the authors and buy them beers when you meet them;]
 
