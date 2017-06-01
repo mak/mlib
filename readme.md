@@ -1,6 +1,6 @@
 # mLib
 
-Your bag of handy codes for malware researchers
+Your bag of handy codez for malware researchers
 
 # Content
 
@@ -41,7 +41,7 @@ Your bag of handy codes for malware researchers
  - parse - parse all the things! especially m$ crypto keys
  
  
- # Licene
+# Licene
 
 Do what ever you want with this,
 
