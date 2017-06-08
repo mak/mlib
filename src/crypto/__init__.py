@@ -43,9 +43,10 @@ class aes:
 
 
     @classmethod
-    def decrypt(cls,d,k,_xor=None,mode='ecb',**rest):
+    def decrypt(cls,d,k,_xor=None,mode='ecb',*rest):
         mode = getattr(AES,'MODE_'+mode.upper())
-        clean = AES.new(k,mode,**rest).decrypt(d)
+        print 
+        clean = AES.new(k,mode,*rest).decrypt(d)
         if _xor:
             return xor(clean,_xor)
         return clean
