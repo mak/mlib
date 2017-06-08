@@ -73,6 +73,12 @@ def get_my_path():
         BASEPATH = realdir(__file__) + os.sep + __name__.split('.')[0]
     return BASEPATH
 
+def ngrams(data,cnt=4):
+    a = [data]
+    for i in range(1,cnt):
+        a.append(data[cnt:])
+    return zip(*a)
+
 def generic_parse(_data):
             
     if not _data:
