@@ -1,8 +1,13 @@
+try:
+    import re2 as re
+except ImportError:
+    import re
+
 from functools import wraps
 from copy import deepcopy
 import gzip as _gz
 import errno,signal,os
-import re,log
+import log
 import string,StringIO
 import random
 import hashlib
@@ -10,6 +15,15 @@ log = log.get_logger(__name__)
 
 chunks = lambda l, n: [l[x: x+n] for x in xrange(0, len(l), n)]
 BASEPATH = ''
+
+
+def re_match(r,d,cstr):
+    if cstr:
+        r += '\x00'
+    return map(lambda x: x.strip("\x00"),re.findall(r,d))
+
+get_urls = lambda d,cstr=False: re_match("https?://[\x21-\x7e]{6,}",d,cstr)
+get_strings = lambda d,cstr=False: re_match('[ -~]{3,}',d,cstr)
 
 
 # def generic_parse(_data):
