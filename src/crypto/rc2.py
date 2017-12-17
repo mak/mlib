@@ -1,14 +1,13 @@
 import array
-from mlib.bits import rol,ror
+from mlib.bits import rol, ror
 
 
+def ROL16(x, n):
+    return rol(x, n, 16) & 0xFFFF
 
-def ROL16 (x, n):
-    return rol(x,n,16) & 0xFFFF
 
-def ROR16 (x, n):
-    return ror(x,n,16) & 0xFFFF
-
+def ROR16(x, n):
+    return ror(x, n, 16) & 0xFFFF
 
 
 class RC2():
@@ -18,7 +17,6 @@ class RC2():
     MODE_CBC = 1
     PADDING_PKCS5 = 1
 
-    
     def __init__(self, key):
 
         sbox = array.array('B', [
@@ -45,7 +43,8 @@ class RC2():
             if len(key) > i:
                 rc2_key[i] = key[i]
             else:
-                rc2_key[i] = sbox[rc2_key[i-1] + rc2_key[i - len(key)] & 0xFF]
+                rc2_key[i] = sbox[rc2_key[i - 1] +
+                                  rc2_key[i - len(key)] & 0xFF]
 
         rc2_key[128 - len(key)] = sbox[rc2_key[128 - len(key)]]
 
@@ -53,30 +52,29 @@ class RC2():
             for i in range(127 - len(key), -1, -1):
                 xor = rc2_key[i + 1] ^ rc2_key[len(key) + i]
                 rc2_key[i] = sbox[xor & 0xFF]
-        
+
         self.K = array.array('H')
         try:
             self.K.fromstring(rc2_key)
         except:
-            self.K.fromstring(''.join(map(chr,rc2_key)))
-
+            self.K.fromstring(''.join(map(chr, rc2_key)))
 
     def encrypt_mixup(self, K, x0, x1, x2, x3, round):
 
         j = round * 4
-        x0 = (x0 + (x2 & x3) + (~x3 & x1)  + K[j]) & 0xFFFF
+        x0 = (x0 + (x2 & x3) + (~x3 & x1) + K[j]) & 0xFFFF
         x0 = ROL16(x0, 1)
         j += 1
 
-        x1 = (x1 + (x3 & x0) + (~x0 & x2)  + K[j]) & 0xFFFF
+        x1 = (x1 + (x3 & x0) + (~x0 & x2) + K[j]) & 0xFFFF
         x1 = ROL16(x1, 2)
         j += 1
 
-        x2 = (x2 + (x0 & x1) + (~x1 & x3)  + K[j]) & 0xFFFF
+        x2 = (x2 + (x0 & x1) + (~x1 & x3) + K[j]) & 0xFFFF
         x2 = ROL16(x2, 3)
         j += 1
 
-        x3 = (x3 + (x1 & x2) + (~x2 & x0)  + K[j]) & 0xFFFF
+        x3 = (x3 + (x1 & x2) + (~x2 & x0) + K[j]) & 0xFFFF
         x3 = ROL16(x3, 5)
 
         return x0, x1, x2, x3
@@ -85,20 +83,19 @@ class RC2():
 
         j = round * 4 + 3
         x3 = ROR16(x3, 5)
-        x3 = (x3 - (x1 & x2) - (~x2 & x0)  - K[j]) & 0xFFFF
+        x3 = (x3 - (x1 & x2) - (~x2 & x0) - K[j]) & 0xFFFF
         j -= 1
 
         x2 = ROR16(x2, 3)
-        x2 = (x2 - (x0 & x1) - (~x1 & x3)  - K[j]) & 0xFFFF
+        x2 = (x2 - (x0 & x1) - (~x1 & x3) - K[j]) & 0xFFFF
         j -= 1
 
         x1 = ROR16(x1, 2)
-        x1 = (x1 - (x3 & x0) - (~x0 & x2)  - K[j]) & 0xFFFF
+        x1 = (x1 - (x3 & x0) - (~x0 & x2) - K[j]) & 0xFFFF
         j -= 1
 
         x0 = ROR16(x0, 1)
-        x0 = (x0 - (x2 & x3) - (~x3 & x1)  - K[j]) & 0xFFFF
-
+        x0 = (x0 - (x2 & x3) - (~x3 & x1) - K[j]) & 0xFFFF
 
         return x0, x1, x2, x3
 
@@ -125,28 +122,46 @@ class RC2():
         R = array.array('H')
         R.fromlist(list(input_buffer))
 
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 0)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 1)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 2)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 3)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 4)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 0)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 1)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 2)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 3)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 4)
 
-        R[0], R[1], R[2], R[3] = self.encrypt_mash(self.K, R[0], R[1], R[2], R[3])
+        R[0], R[1], R[2], R[3] = self.encrypt_mash(
+            self.K, R[0], R[1], R[2], R[3])
 
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 5)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 6)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 7)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 8)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 9)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 10)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 5)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 6)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 7)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 8)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 9)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 10)
 
-        R[0], R[1], R[2], R[3] = self.encrypt_mash(self.K, R[0], R[1], R[2], R[3])
+        R[0], R[1], R[2], R[3] = self.encrypt_mash(
+            self.K, R[0], R[1], R[2], R[3])
 
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 11)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 12)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 13)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 14)
-        R[0], R[1], R[2], R[3] = self.encrypt_mixup(self.K, R[0], R[1], R[2], R[3], 15)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 11)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 12)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 13)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 14)
+        R[0], R[1], R[2], R[3] = self.encrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 15)
 
         return bytearray(R.tostring())
 
@@ -156,55 +171,76 @@ class RC2():
         try:
             R.fromstring(input_buffer)
         except:
-            R.fromstring(''.join(map(chr,input_buffer)))
+            R.fromstring(''.join(map(chr, input_buffer)))
 
 #        R.fromstring(input_buffer)
 
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 15)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 14)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 13)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 12)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 11)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 15)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 14)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 13)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 12)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 11)
 
-        R[0], R[1], R[2], R[3] = self.decrypt_mash(self.K, R[0], R[1], R[2], R[3])
+        R[0], R[1], R[2], R[3] = self.decrypt_mash(
+            self.K, R[0], R[1], R[2], R[3])
 
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 10)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 9)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 8)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 7)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 6)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 5)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 10)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 9)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 8)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 7)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 6)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 5)
 
-        R[0], R[1], R[2], R[3] = self.decrypt_mash(self.K, R[0], R[1], R[2], R[3])
+        R[0], R[1], R[2], R[3] = self.decrypt_mash(
+            self.K, R[0], R[1], R[2], R[3])
 
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 4)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 3)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 2)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 1)
-        R[0], R[1], R[2], R[3] = self.decrypt_mixup(self.K, R[0], R[1], R[2], R[3], 0)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 4)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 3)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 2)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 1)
+        R[0], R[1], R[2], R[3] = self.decrypt_mixup(
+            self.K, R[0], R[1], R[2], R[3], 0)
 
-        return map(ord,R.tostring())
+        return map(ord, R.tostring())
 
-    def encrypt(self, input_buffer, mode, IV = None, padding = None):
+    def encrypt(self, input_buffer, mode, IV=None, padding=None):
 
         if (len(input_buffer) % self.RC2_BLOCK_SIZE) == 0 and padding != PADDING_PKCS5:
             crypt_size = len(input_buffer)
         else:
-            crypt_size = ((len(input_buffer) // self.RC2_BLOCK_SIZE) + 1) * self.RC2_BLOCK_SIZE
+            crypt_size = (
+                (len(input_buffer) // self.RC2_BLOCK_SIZE) + 1) * self.RC2_BLOCK_SIZE
 
         crypt_buffer = bytearray(crypt_size)
-        
+
         for i in range(crypt_size):
             if len(input_buffer) > i:
                 crypt_buffer[i] = input_buffer[i]
             elif padding == PADDING_PKCS5:
-                crypt_buffer[i] = (self.RC2_BLOCK_SIZE - (len(input_buffer) % self.RC2_BLOCK_SIZE)) & 0xFF
+                crypt_buffer[i] = (
+                    self.RC2_BLOCK_SIZE - (len(input_buffer) % self.RC2_BLOCK_SIZE)) & 0xFF
 
         result = bytearray()
 
-        for block_counter in range(crypt_size//self.RC2_BLOCK_SIZE):
+        for block_counter in range(crypt_size // self.RC2_BLOCK_SIZE):
 
-            block = crypt_buffer[block_counter * self.RC2_BLOCK_SIZE:block_counter * self.RC2_BLOCK_SIZE + self.RC2_BLOCK_SIZE]
+            block = crypt_buffer[block_counter * self.RC2_BLOCK_SIZE:block_counter *
+                                 self.RC2_BLOCK_SIZE + self.RC2_BLOCK_SIZE]
 
             if block_counter == 0:
                 if mode == self.MODE_CBC and IV is not None:
@@ -214,24 +250,25 @@ class RC2():
                 if mode == self.MODE_CBC:
                     for i in range(self.RC2_BLOCK_SIZE):
                         block[i] = block[i] ^ block_result[i]
-            
+
             block_result = self.block_encrypt(block)
 
             result += block_result
 
         return result
 
-    def decrypt(self, input_buffer, mode, IV = None, padding = None):
+    def decrypt(self, input_buffer, mode, IV=None, padding=None):
 
         crypt_size = len(input_buffer)
         crypt_buffer = bytearray(crypt_size)
-        
+
         for i in range(crypt_size):
             crypt_buffer[i] = input_buffer[i]
 
-        for block_counter in range(crypt_size//self.RC2_BLOCK_SIZE):
+        for block_counter in range(crypt_size // self.RC2_BLOCK_SIZE):
 
-            block = crypt_buffer[block_counter * self.RC2_BLOCK_SIZE:block_counter * self.RC2_BLOCK_SIZE + self.RC2_BLOCK_SIZE]
+            block = crypt_buffer[block_counter * self.RC2_BLOCK_SIZE:block_counter *
+                                 self.RC2_BLOCK_SIZE + self.RC2_BLOCK_SIZE]
 
             block_result = self.block_decrypt(block)
 
@@ -239,17 +276,19 @@ class RC2():
                 if block_counter == 0:
                     if IV is not None:
                         for i in range(self.RC2_BLOCK_SIZE):
-                            crypt_buffer[block_counter * self.RC2_BLOCK_SIZE + i] = block_result[i] ^ IV[i]
+                            crypt_buffer[block_counter *
+                                         self.RC2_BLOCK_SIZE + i] = block_result[i] ^ IV[i]
                 else:
                     for i in range(self.RC2_BLOCK_SIZE):
-                        crypt_buffer[block_counter * self.RC2_BLOCK_SIZE + i] = block_result[i] ^ previous_block[i]
+                        crypt_buffer[block_counter * self.RC2_BLOCK_SIZE +
+                                     i] = block_result[i] ^ previous_block[i]
             else:
                 for i in range(self.RC2_BLOCK_SIZE):
-                    crypt_buffer[block_counter * self.RC2_BLOCK_SIZE + i] = block_result[i]
+                    crypt_buffer[block_counter *
+                                 self.RC2_BLOCK_SIZE + i] = block_result[i]
 
             previous_block = block
-        
+
         if padding == self.PADDING_PKCS5:
             crypt_buffer = crypt_buffer[:-crypt_buffer[crypt_size - 1]]
         return crypt_buffer
-

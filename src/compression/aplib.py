@@ -1,4 +1,4 @@
-__all__ = ['unpack','decompress']
+__all__ = ['unpack', 'decompress']
 
 # this is a standalone single-file merge of aplib compression and decompression
 # taken from my own library Kabopan http://code.google.com/p/kabopan/
@@ -7,6 +7,8 @@ __all__ = ['unpack','decompress']
 # Ange Albertini, BSD Licence, 2007-2011
 
 # from kbp\comp\_lz77.py  ##################################################
+
+
 def find_longest_match(s, sub):
     """returns the number of byte to look backward and the length of byte to copy)"""
     if sub == "":
@@ -42,16 +44,19 @@ def find_longest_match(s, sub):
 
 # from _misc.py ###############################
 
+
 def int2lebin(value, size):
     """ouputs value in binary, as little-endian"""
     result = ""
     for i in xrange(size):
-        result = result + chr((value >> (8 * i)) & 0xFF )
+        result = result + chr((value >> (8 * i)) & 0xFF)
     return result
+
 
 def modifystring(s, sub, offset):
     """overwrites 'sub' at 'offset' of 's'"""
     return s[:offset] + sub + s[offset + len(sub):]
+
 
 def getbinlen(value):
     """return the bit length of an integer"""
@@ -63,8 +68,10 @@ def getbinlen(value):
         result += 1
     return result
 
+
 class _bits_decompress():
     """bit machine for variable-sized auto-reloading tag decompression"""
+
     def __init__(self, data, tagsize):
         self.__curbit = 0
         self.__offset = 0
@@ -90,7 +97,7 @@ class _bits_decompress():
             for i in xrange(self.__tagsize - 1):
                 self.__tag += ord(self.read_byte()) << (8 * (i + 1))
 
-        bit = (self.__tag  >> ((self.__tagsize * 8) - 1)) & 0x01
+        bit = (self.__tag >> ((self.__tagsize * 8) - 1)) & 0x01
         self.__tag <<= 1
         return bit
 
@@ -101,7 +108,7 @@ class _bits_decompress():
         """read next byte from the stream"""
         if type(self.__in) == str:
             result = self.__in[self.__offset]
-        elif hasattr(self.__in,'read'):
+        elif hasattr(self.__in, 'read'):
             result = self.__in.read(1)
         self.__offset += 1
         return result
@@ -110,7 +117,7 @@ class _bits_decompress():
         """reads a fixed bit-length number"""
         result = init
         for i in xrange(nbbit):
-            result = (result << 1)  + self.read_bit()
+            result = (result << 1) + self.read_bit()
         return result
 
     def read_variablenumber(self):
@@ -142,6 +149,7 @@ class _bits_decompress():
             self.out += value
         return False
 
+
 # from kbp\comp\aplib.py ###################################################
 """
 aPLib, LZSS based lossless compression algorithm
@@ -149,13 +157,13 @@ aPLib, LZSS based lossless compression algorithm
 Jorgen Ibsen U{http://www.ibsensoftware.com}
 """
 
+
 def lengthdelta(offset):
     if offset < 0x80 or 0x7D00 <= offset:
         return 2
     elif 0x500 <= offset:
         return 1
     return 0
-
 
 
 class a_decompress(_bits_decompress):
@@ -177,7 +185,7 @@ class a_decompress(_bits_decompress):
 
     def __block(self):
         b = self.read_variablenumber()    # 2-
-        if b == 2 and self.__pair :    # reuse the same offset
+        if b == 2 and self.__pair:    # reuse the same offset
             offset = self.__lastoffset
             length = self.read_variablenumber()    # 2-
         else:
@@ -204,7 +212,7 @@ class a_decompress(_bits_decompress):
         return False
 
     def __singlebyte(self):
-        offset = self.read_fixednumber(4) # 0-15
+        offset = self.read_fixednumber(4)  # 0-15
         if offset:
             self.back_copy(offset)
         else:
@@ -220,23 +228,25 @@ class a_decompress(_bits_decompress):
                 break
         return self.out, self.getoffset()
 
- 
-    
+
+# end of Kabopan
 import StringIO
 import ctypes
 
 from mlib.misc import load_dll
-aPLIB=load_dll('so/_aplib.so')  
-def unpack(data,s=0): 
-  cin = ctypes.c_buffer(data)
-  cout = ctypes.c_buffer(s if s else len(data)*20)
-  n=aPLIB.aP_depack(cin,cout)
-  return cout.raw[:n]
+aPLIB = load_dll('so/_aplib.so')
 
 
-def decompress(d,s):
+def unpack(data, s=0):
+    cin = ctypes.c_buffer(data)
+    cout = ctypes.c_buffer(s if s else len(data) * 20)
+    n = aPLIB.aP_depack(cin, cout)
+    return cout.raw[:n]
+
+
+def decompress(d, s):
     try:
-        r=  a_decompress(StringIO.StringIO(d)).do()[0]
+        r = a_decompress(StringIO.StringIO(d)).do()[0]
     except IndexError:
-        r = unpack(d,s)
+        r = unpack(d, s)
     return r

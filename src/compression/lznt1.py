@@ -57,7 +57,6 @@ TAG_MASKS = [(1 << i) for i in range(0, 8)]
 def decompress_data(cdata):
     """Decompresses the data."""
 
-
     in_fd = cStringIO.StringIO(cdata)
     output_fd = cStringIO.StringIO()
     block_end = 0

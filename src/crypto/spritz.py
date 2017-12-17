@@ -1,17 +1,18 @@
 class Spritz:
 
-    def __init__(self,op):
+    def __init__(self, op):
         self.initialise_state()
         self.op = op
+
     def encrypt(self, K, M):
         self.initialise_state()
         self.absorb(K)
-        return bytearray(self.op(b1,b2) for b1, b2 in zip(M, self.squeeze(len(M))))
+        return bytearray(self.op(b1, b2) for b1, b2 in zip(M, self.squeeze(len(M))))
 
     def decrypt(self, K, C):
         self.initialise_state()
         self.absorb(K)
-        return bytearray(self.op(b1,b2) for b1, b2 in zip(C, self.squeeze(len(C))))
+        return bytearray(self.op(b1, b2) for b1, b2 in zip(C, self.squeeze(len(C))))
 
     def hash(self, M, r):
         self.initialise_state()
@@ -43,7 +44,7 @@ class Spritz:
         self.a = self.add(self.a, 1)
 
     def absorb_stop(self):
-        if self.a  == 128:
+        if self.a == 128:
             self.shuffle()
         self.a = self.add(self.a, 1)
 
@@ -83,7 +84,8 @@ class Spritz:
         self.swap(self.i, self.j)
 
     def output(self):
-        self.z = self.S[self.add(self.j, self.S[self.add(self.i, self.S[self.add(self.z, self.k)])])]
+        self.z = self.S[self.add(self.j, self.S[self.add(
+            self.i, self.S[self.add(self.z, self.k)])])]
         return self.z
 
     def add(self, *args):
@@ -92,7 +94,6 @@ class Spritz:
     # def xor(self, a,b):
     #     return a ^ b
 
-    
     def base_10_to_256(self, n):
         m = bytearray()
         while n:
