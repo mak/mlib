@@ -7,7 +7,8 @@ setup(name='mLib',
       author='Maciej Kotowicz',
       author_email='mak@lokalhost.pl',
       url='https://github.com/mak/mlib',
-      package_dir = {'mlib':'src'},
-      packages=['mlib','mlib.compression','mlib.crypto','mlib.disasm','mlib.winapi','mlib.malware'],
-      package_data = {'mlib':['so/*so']}
-     )
+      package_dir={'mlib': 'src'},
+      packages=['mlib', 'mlib.compression', 'mlib.crypto',
+                'mlib.disasm', 'mlib.winapi', 'mlib.malware'],
+      package_data={'mlib': ['so/*so']}
+      )

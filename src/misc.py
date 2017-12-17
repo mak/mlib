@@ -25,13 +25,14 @@ def chunks(l, n): return [l[x: x + n] for x in xrange(0, len(l), n)]
 BASEPATH = ''
 
 
-def re_match(r,d,cstr):
+def re_match(r, d, cstr):
     if cstr:
         r += '\x00'
-    return map(lambda x: x.strip("\x00"),re.findall(r,d))
+    return map(lambda x: x.strip("\x00"), re.findall(r, d))
 
-get_urls = lambda d,cstr=False: re_match("https?://[\x21-\x7e]{6,}",d,cstr)
-get_strings = lambda d,cstr=False: re_match('[ -~]{3,}',d,cstr)
+
+get_urls = lambda d, cstr=False: re_match("https?://[\x21-\x7e]{6,}", d, cstr)
+get_strings = lambda d, cstr=False: re_match('[ -~]{3,}', d, cstr)
 
 
 # def generic_parse(_data):
@@ -88,21 +89,25 @@ def realpath(p):
         my_path = os.readlink(my_path)
     return my_path
 
+
 def realdir(p):
     my_path = realpath(p)
     return os.path.dirname(os.path.dirname(my_path))
-    
+
+
 def get_my_path():
     global BASEPATH
     if not BASEPATH:
         BASEPATH = realdir(__file__) + os.sep + __name__.split('.')[0]
     return BASEPATH
 
-def ngrams(data,cnt=4):
+
+def ngrams(data, cnt=4):
     a = [data]
-    for i in range(1,cnt):
+    for i in range(1, cnt):
         a.append(data[cnt:])
     return zip(*a)
+
 
 def generic_parse(_data):
 
