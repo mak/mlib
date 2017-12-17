@@ -1,6 +1,5 @@
 #!/usr/bin/env python2
-
-from distutils.core import setup
+from setuptools import setup
 
 setup(name='mLib',
       version='1.2.1',
