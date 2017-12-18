@@ -231,45 +231,26 @@ class E():
 #            _pool.apply_async(self.disas_block,(addr,))
 
 
-with open(sys.argv[1]) as f:
-    d = f.read()
-p = PE(_data=d)
-engine = E(p)
-print hex(p.entry)
-engine.run()
-print engine.bb(0x040158C)
-print engine.bb(0x04015BD)
-print engine.bb(0x040157D)
-for a in engine.switch_jmp:
-    bb = engine.bb(a)
-    last_addr = bb.code[-1].ins.address
-    for a0 in engine.solve_switch_jump(a):
-        bb.to.append(a0)
-        engine.do_address(a, a0, last_addr)
-engine.run_in_loop()
-xbb = engine.bb(0x0402814)
-print xbb.code[0].group('jump')
-print engine.xrefs[0x401584]
+# with open(sys.argv[1]) as f:
+#     d = f.read()
+# p = PE(_data=d)
+# engine = E(p)
+# print hex(p.entry)
+# engine.run()
+# print engine.bb(0x040158C)
+# print engine.bb(0x04015BD)
+# print engine.bb(0x040157D)
+# for a in engine.switch_jmp:
+#     bb = engine.bb(a)
+#     last_addr = bb.code[-1].ins.address
+#     for a0 in engine.solve_switch_jump(a):
+#         bb.to.append(a0)
+#         engine.do_address(a, a0, last_addr)
+# engine.run_in_loop()
+# xbb = engine.bb(0x0402814)
+# print xbb.code[0].group('jump')
+# print engine.xrefs[0x401584]
 
-print hex(p.imports['printf']['addr'])
-print engine.xrefs[p.imports['printf']['addr']]
+# print hex(p.imports['printf']['addr'])
+# print engine.xrefs[p.imports['printf']['addr']]
 
-
-# print hex(timesmth)
-
-
-# ins2=engine.bb(0x0407C77).code[-1]
-# print ins2
-# print ins2.ins.regs_access()
-
-# print len(engine.bb)
-# print 0x403412 in engine.bb
-
-# import json
-# ida_bb = json.load(open('/tmp/bb'))
-# # for bb in engine.bb:
-# #     if bb not in ida_bb:
-# #         print 'huh ida didnt found it?...',hex(bb)
-# for bb in ida_bb:
-#     if bb not in engine.bb:
-#         print 'huh i didnt found it?...',hex(bb)

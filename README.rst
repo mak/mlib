@@ -35,7 +35,8 @@ Content
 	
  - winapi - various things related to windows api,
  
-   - resolve api name from hash	
+   - resolve api name from hash
+   - port of `CryptExportKey`/`CryptImportKey` returning object from `mlib.crypto`
 	
  - bits - various things that operates on bits
  - hash - some old school hashes used in api resolving

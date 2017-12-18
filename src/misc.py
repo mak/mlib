@@ -3,20 +3,20 @@ try:
 except ImportError:
     import re
 
+import enum
 from functools import wraps
 from copy import deepcopy
 import gzip as _gz
-
 import errno
 import signal
 import os
-import re
-import log
 import string
 import StringIO
 import random
 import hashlib
-log = log.get_logger(__name__)
+
+#import log
+#log = log.get_logger(__name__)
 
 
 def chunks(l, n): return [l[x: x + n] for x in xrange(0, len(l), n)]
@@ -35,12 +35,22 @@ get_urls = lambda d, cstr=False: re_match("https?://[\x21-\x7e]{6,}", d, cstr)
 get_strings = lambda d, cstr=False: re_match('[ -~]{3,}', d, cstr)
 
 
+class E(enum.Enum):
+
+    @classmethod
+    def from_val(cls, val):
+        for n, e in cls.__members__.items():
+            if e.value == val:
+                return e
+        return None
+
 # def generic_parse(_data):
 #     try:
 #         return _generic_parse(_data)
 #     except:
 #         print _data
 #         raise Exception('asdf')
+
 
 def generic_unparse(data, do_rest=False):
     cfg = deepcopy(data)
@@ -196,7 +206,8 @@ def __process_ent(d, ret):
             continue
 
         if tag == 'data_end':
-            log.error('fucked up config... skip it...')
+            #log.error('fucked up config... skip it...')
+            print '[-] fucked up config... skip it...'
             continue
 
         _end = rest.find('data_end')
