@@ -34,9 +34,29 @@ class E():
         self._bb = {}
         self._bb_range = {}
 
-        self.funcs = []
+        # functions
+        self._funcs = set()
+        self._funcs_obj = {}
+
         self.xrefs = {}
         self.switch_jmp = []
+
+    @property
+    def funcs(self):
+        return list(self._funcs)
+
+    def function(self, addr):
+        raise NotImplementedError
+
+        if addr not in self._funcs:
+            # TODO: find coresponding funcion
+            return None
+
+        if addr in self._funcs_obj:
+            return self._funcs_obj[addr]
+
+        # TODO build function object
+        return None
 
     def bb(self, a):
         if a in self._bb:
@@ -65,7 +85,7 @@ class E():
         if x:
             self.add_xref(x, a)
         if func:
-            self.funcs.append(a)
+            self._funcs.append(a)
         self.q.append((f, a))
 #        self.disas_block(None,a)
 
@@ -87,7 +107,7 @@ class E():
                     return
 
                 if self.ldr.is_exec(addr):
-                    self.do_address(None, addr, c.ins.address)
+                    self.do_address(None, addr, c.ins.address, func=True)
                     self.add_xref(c.val(0), c.ins.address)
 
             elif c.val(0) in self.ldr.imports \
@@ -98,7 +118,7 @@ class E():
                 self.add_xref(c.val(0), c.ins.address)
 
         elif c.is_imm(0) and not c.reg(0):
-            self.do_address(None, c.val(0), c.ins.address)
+            self.do_address(None, c.val(0), c.ins.address, func=True)
             # self.add_xref(c.val(0),c.ins.address)
             # self.q.put(c.val(0))
 
@@ -108,7 +128,10 @@ class E():
         to = []
         ends_with_jump = False
 
-        for c in self.ldr.disasm(addr, 0x100):
+        # for c in self.ldr.disasm(addr, 0x100):
+        waddr = addr
+        while True
+            c = self.ldr.disasm(waddr, 15).next()
             cc.append(c)
 #            print repr(c),map(c.ins.group_name,c.ins.groups),c.ins.group(1)
             if c.group('ret'):
@@ -136,10 +159,11 @@ class E():
                     break
 
             elif c.mnem == 'push' and c.is_imm(0) and self.can_be_function(c.val(0)):
-                self.do_address(None, c.val(0), c.ins.address)
+                self.do_address(None, c.val(0), c.ins.address, func=True)
 
             elif c.mnem == 'mov' and c.is_imm(1) and self.can_be_function(c.val(1)):
-                self.do_address(None, c.val(1), c.ins.address)
+                self.do_address(None, c.val(1), c.ins.address, func=True)
+            waddr += c.ins.size
 
         if len(cc) == 1 and cc[0].mnem == 'jmp':
             # TODO:this usless indirection that should be delt with
@@ -201,7 +225,7 @@ class E():
         if not addr:
             addr = ins.val(0)
         if cnt:
-            print addr, cnt
+            # print addr, cnt
             jmps = [self.ldr.dword(addr + 4 * i)for i in range(cnt + 1)]
         return jmps
 
@@ -221,11 +245,11 @@ class E():
     def run(self):
 
         self.q = []
-        self.do_address(None, self.ldr.entry, None)
+        self.do_address(None, self.ldr.entry, None, func=True)
         self.run_in_loop()
-        print '[*] dicoverd bb: %d' % len(self._bb)
+        # print '[*] dicoverd bb: %d' % len(self._bb)
         # print '[*] problems with %d switch-case' % len(self.switch_jmp)
-        print map(hex, self.switch_jmp)
+        # print map(hex, self.switch_jmp)
         # for a in self.switch_jmp:
         #
 #            _pool.apply_async(self.disas_block,(addr,))
@@ -253,4 +277,3 @@ class E():
 
 # print hex(p.imports['printf']['addr'])
 # print engine.xrefs[p.imports['printf']['addr']]
-

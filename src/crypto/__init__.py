@@ -11,6 +11,8 @@ from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
 from mlib.misc import load_dll
+from mlib.bits import rol
+
 from . import rc6 as _rc6
 from . import rc2 as _rc2
 from . import spritz as _spritz
@@ -37,6 +39,11 @@ def rsa_new_pkcs(n=1024):
 
 class rc2:
 
+    RC2_BLOCK_SIZE = 8
+    MODE_ECB = 0
+    MODE_CBC = 1
+    PADDING_PKCS5 = 1
+
     @classmethod
     def decrypt(cls, d, key, mode, IV=None, padding=None):
         return _rc2(key).decrypt(d, mode, IV, padding)
@@ -49,7 +56,10 @@ class rc2:
 class aes:
 
     @classmethod
-    def decrypt(cls, d, k, _xor=None, mode='ecb', *rest):
+    def decrypt(cls, d, k=None, _xor=None, mode='ecb', *rest):
+        if not k:
+            k = cls.key
+
         mode = getattr(AES, 'MODE_' + mode.upper())
         clean = AES.new(k, mode, *rest).decrypt(d)
         if _xor:
@@ -60,12 +70,15 @@ class aes:
 class rc4:
 
     @classmethod
-    def decrypt(cls, data, key, derive_key=None, xor=None, mod1=0, mod2=0):
+    def decrypt(cls, data, key=None, derive_key=None, use_sbox=False, xor=None, mod1=0, mod2=0):
+
+        if not key:
+            key = cls.key
 
         if derive_key:
             key = derive_key(key)
 
-        if len(key) < 0x100:
+        if not use_sbox:
             cip = RC4.new(key)
             return cip.decrypt(data)
 
@@ -92,8 +105,8 @@ class rc4:
         return k
 
     @classmethod
-    def encrypt(cls, data, key, derive_key=None, xor=None, mod1=0, mod2=0):
-        return rc4.decrypt(data, key, derive_key, xor, mod1, mod2)
+    def decrypt(cls, data, key=None, derive_key=None, use_sbox=False, xor=None, mod1=0, mod2=0):
+        return rc4.decrypt(, data, key, derive_key, use_sbox=False, xor, mod1, mod2)
 
 
 def visEncry(datA):

@@ -1,6 +1,9 @@
 #!/usr/bin/env python2
-from setuptools import setup
 
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
 
 def long_description():
     with open('README.rst') as f:

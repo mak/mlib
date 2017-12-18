@@ -5,6 +5,17 @@ import struct
 from StringIO import StringIO
 
 
+if 'struct' in sys.modules:
+    del sys.modules['struct']
+    st = __import__('struct')
+
+
+def get_size(klass):
+    import ctypes
+    f = getattr(klass, 'sizeof', lambda: ctypes.sizeof(klass))
+    return f()
+
+
 # sys._getframe(1).f_code.co_name
 class M(object):
 
@@ -33,6 +44,14 @@ class M(object):
         r = self.b.read(n)
         self.b.seek(old_l, os.SEEK_SET)
         return r
+
+    def read_struct_at(self, klass, at):
+        d = self.read_at(at, get_size(klass))
+        return klass.parse(d)
+
+    def read_struct(self, klass):
+        d = self.read(get_size(klass))
+        return klass.parse(d)
 
     # def bytes(self,t):
     #     s=  self.dword()
