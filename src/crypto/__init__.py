@@ -105,8 +105,8 @@ class rc4:
         return k
 
     @classmethod
-    def decrypt(cls, data, key=None, derive_key=None, use_sbox=False, xor=None, mod1=0, mod2=0):
-        return rc4.decrypt(, data, key, derive_key, use_sbox=False, xor, mod1, mod2)
+    def encrypt(cls, data, key=None, derive_key=None, use_sbox=False, xor=None, mod1=0, mod2=0):
+        return rc4.decrypt(data, key, derive_key, use_sbox, xor, mod1, mod2)
 
 
 def visEncry(datA):

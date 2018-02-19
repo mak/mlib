@@ -27,7 +27,7 @@ class M(object):
         self.b = StringIO(d)
 
     def _get_bytes(self, fmt, s, at=False, off=0):
-        return struct.unpack(fmt, self.read_at(off, s) if at else self.read(s))[0]
+        return st.unpack(fmt, self.read_at(off, s) if at else self.read(s))[0]
 
     def skip(self, n):
         self.b.seek(n, os.SEEK_CUR)
