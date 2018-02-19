@@ -61,7 +61,7 @@ I wish...
 Contact
 ---------
 
-If you have any questions, hit me up - mak@malware.porn
+If you have any questions, hit me up - mak@malwarelab.pl
 
 --
 
