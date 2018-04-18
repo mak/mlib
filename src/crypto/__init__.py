@@ -16,7 +16,7 @@ from mlib.bits import rol
 from . import rc6 as _rc6
 from . import rc2 as _rc2
 from . import spritz as _spritz
-
+from . import rabbit as _rabbit
 
 def chunks(l, n): return [l[x: x + n] for x in xrange(0, len(l), n)]
 
@@ -188,32 +188,32 @@ class xtea:
 class rc6:
 
     @classmethod
-    def decrypt(cls, d, k, typ='sbox'):
+    def decrypt(cls, d, k, typ='sbox',**kwargs):
         if typ == 'str':
-            rc = _rc6.RC6(k)
-
+            rc = _rc6.RC6(k,**kwargs)
             def ciph(d, k): return rc.decrypt(d)
         else:
             if type(k) == str:
                 k = struct.unpack('I' * (len(k) / 4), k)
 
             def ciph(d, k): return _rc6.RC6('a' * 16).decrypt(d, k)
+                
         r = []
         for i in range(0, len(d) >> 4):
             r.append(ciph(d[i * 16:(i + 1) * 16], k))
         return ''.join(r)
 
     @classmethod
-    def encrypt(cls, d, k, typ='sbox'):
+    def encrypt(cls, d, k, typ='sbox',**kwargs):
         if typ == 'str':
-            rc = _rc6.RC6(k)
-
+            rc = _rc6.RC6(k,**kwargs)
             def ciph(d, k): return rc.encrypt(d)
         else:
             if type(k) == str:
                 k = struct.unpack('I' * (len(k) / 4), k)
 
             def ciph(d, k): return _rc6.RC6('a' * 16).encrypt(d, k)
+                
         r = []
         for i in range(0, len(d) >> 4):
             r.append(ciph(d[i * 16:(i + 1) * 16], k))
@@ -272,3 +272,12 @@ class serpent:
         cout = c_buffer(clen)
         cls.LIB.encrypt(cin, clen, ckey, cout)
         return cout.raw
+
+
+
+class rabbit:
+    @classmethod
+    def encrypt(cls,data,key,iv=None):
+        return _rabbit.Rabbit(key,iv or '').crypt(data)
+
+    decrypt = encrypt

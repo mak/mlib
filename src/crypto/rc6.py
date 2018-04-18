@@ -19,11 +19,15 @@ def _mul(a, b):
 
 
 class RC6(object):
-    def __init__(self, key):
+    def __init__(self, key, inverse=False, iv = None):
         self.state = S = []
         key += "\0" * (4 - len(key) & 3)  # pad key
-
-        L = list(struct.unpack("<%sL" % (len(key) / 4), key))
+        fmt = '> ' if inverse else '>'
+        self.rol = ror if inverse else rol
+        self.ror = rol if inverse else ror
+        self.iv  = iv
+        
+        L = list(struct.unpack(fmt+"%sL" % (len(key) / 4), key))
 
         S.append(0xb7e15163)
         for i in range(43):
@@ -34,11 +38,14 @@ class RC6(object):
         A = B = i = j = 0
 
         for n in range(v):
-            A = S[i] = rol(_add(S[i], A, B), 3)
-            B = L[j] = rol(_add(L[j] + A + B), _add(A + B))
+            A = S[i] = self.rol(_add(S[i], A, B), 3)
+            B = L[j] = self.rol(_add(L[j] + A + B), _add(A + B))
             i = (i + 1) % len(S)
             j = (j + 1) % len(L)
 
+        for e in iv:
+            S.append(e)
+            
     def encrypt(self, block, state=None):
         S = state if state else self.state
         A, B, C, D = struct.unpack("<4L", block.ljust(16, '\0'))
@@ -47,10 +54,10 @@ class RC6(object):
         D = _add(D, S[1])
 
         for i in range(1, 21):  # 1..20
-            t = rol(_mul(B, rol(B, 1) | 1), 5)
-            u = rol(_mul(D, rol(D, 1) | 1), 5)
-            A = _add(rol(A ^ t, u), S[2 * i])
-            C = _add(rol(C ^ u, t), S[2 * i + 1])
+            t = self.rol(_mul(B, add(B, B, 1)), 5)
+            u = self.rol(_mul(D, add(D, D, 1)), 5)
+            A = _add(self.rol(A ^ t, u), S[2 * i])
+            C = _add(self.rol(C ^ u, t), S[2 * i + 1])
 
             A, B, C, D = B, C, D, A
 
@@ -61,7 +68,8 @@ class RC6(object):
 
     def decrypt(self, block, state=None):
         S = state if state else self.state
-        A, B, C, D = struct.unpack("<4L", block.ljust(16, "\0"))  # * 16)
+        in_block = struct.unpack("<4L", block.ljust(16, "\0"))  # * 16)a
+        A, B, C, D = in_block
 
         C = _add(C, -S[43])
         A = _add(A, -S[42])
@@ -69,13 +77,18 @@ class RC6(object):
         for i in range(20, 0, -1):  # 20..1
             A, B, C, D = D, A, B, C
 
-            u = rol(_mul(D, _add(rol(D, 1) | 1)), 5)
-            t = rol(_mul(B, _add(rol(B, 1) | 1)), 5)
-            C = ror(_add(C, -S[2 * i + 1]), t) ^ u
-            A = ror(_add(A, -S[2 * i]), u) ^ t
+            u = self.rol(_mul(D, _add(D, D, 1)), 5)
+            t = self.rol(_mul(B, _add(B, B, 1)), 5)
+            C = self.ror(_add(C, -S[2 * i + 1]), t) ^ u
+            A = self.ror(_add(A, -S[2 * i]), u) ^ t
 
         D = _add(D, -S[1])
         B = _add(B, -S[0])
 
         # [A,B,C,D]
+        if self.iv:
+            A,B,C,D = [ x ^ y for x,y in zip([A,B,C,D],S[44:])]
+            for i,e in enumerate(in_block):
+                S[44+i] = e
+            
         return struct.pack("<4L", A & 0xffffffff, B & 0xffffffff, C & 0xffffffff, D & 0xffffffff)
