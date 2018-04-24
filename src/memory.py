@@ -26,8 +26,8 @@ class M(object):
         self._len = len(d)
         self.b = StringIO(d)
 
-    def _get_bytes(self, fmt, s, at=False, off=0):
-        return st.unpack(fmt, self.read_at(off, s) if at else self.read(s))[0]
+    def _get_bytes(self, fmt, s, off):
+        return st.unpack(fmt, self.read(off, s) if off else self.read(s))[0]
 
     def skip(self, n):
         self.b.seek(n, os.SEEK_CUR)
@@ -35,9 +35,14 @@ class M(object):
     def unskip(self, n):
         self.b.seek(-n, os.SEEK_CUR)
 
-    def read(self, n):
-        return self.b.read(n)
-
+    def read(self, a0, a1= None):
+        r = None
+        if a1 is None:
+            r = self.b.read(a0)
+        else:
+            r = self.read_at(a0,a1)
+        return r
+    
     def read_at(self, off, n):
         old_l = self.b.tell()
         self.b.seek(off, os.SEEK_SET)
@@ -62,14 +67,12 @@ class M(object):
     def __getattr__(self, name):
         at = False
         if name.endswith('_at'):
-            at = True
-            name = name.strip('_at')
+            name = name[:-3]
 
         if name in M.TRANSL:
             f, s = M.TRANSL[name]
-            return (lambda off: self._get_bytes(f, s, at, off)) if at else (lambda: self._get_bytes(f, s))
+            return lambda off = None: self._get_bytes(f, s, off)
 
-    #setattr(M,typ+'_at',lambda cl,off: struct.unpack(fmt,cl.read_at(off,s))[0])
 
 
 if __name__ == '__main__':
