@@ -11,7 +11,7 @@ def long_description():
     return d
 
 setup(name='mLib',
-      version='1.2.0',
+      version='1.2.3',
       description='Library contains functions commonly used in malware research',
       long_description=long_description(),
       author='Maciej Kotowicz',
