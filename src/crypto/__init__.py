@@ -104,10 +104,7 @@ class rc4:
         k = getattr(hashlib, hash)(key).digest()[:5]
         return k
 
-    @classmethod
-    def encrypt(cls, data, key=None, derive_key=None, use_sbox=False, xor=None, mod1=0, mod2=0):
-        return rc4.decrypt(data, key, derive_key, use_sbox, xor, mod1, mod2)
-
+    encrypt = decrypt
 
 def visEncry(datA):
     i = len(datA) - 1
@@ -240,11 +237,7 @@ class spritz:
         data, key = cls.mk_args(data, key)
         return str(cls._class.decrypt(key, data))
 
-    @classmethod
-    def decrypt(cls, data, key):
-        data, key = cls.mk_args(data, key)
-        return str(cls._class.encrypt(key, data))
-
+    encrypt = decrypt
 
 class serpent:
     LIB = load_dll('so/_serpent.so')
@@ -276,6 +269,7 @@ class serpent:
 
 
 class rabbit:
+    
     @classmethod
     def encrypt(cls,data,key,iv=None):
         return _rabbit.Rabbit(key,iv or '').crypt(data)
