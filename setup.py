@@ -11,7 +11,7 @@ def long_description():
     return d
 
 setup(name='mLib',
-      version='1.2.3',
+      version='1.2.4',
       description='Library contains functions commonly used in malware research',
       long_description=long_description(),
       author='Maciej Kotowicz',
@@ -19,7 +19,8 @@ setup(name='mLib',
       url='https://github.com/mak/mlib',
       package_dir={'mlib': 'src'},
       packages=['mlib', 'mlib.compression', 'mlib.crypto',
-                'mlib.disasm', 'mlib.winapi', 'mlib.malware'],
+                'mlib.disasm', 'mlib.winapi', 'mlib.malware',
+                'mlib.struct'],
       package_data={'mlib': ['so/*so']},
       classifiers=[
           'Development Status :: 5 - Production/Stable',

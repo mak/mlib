@@ -4,3 +4,4 @@ bitarray
 capstone
 pefile 
 enum34
+pycparser[cstruct]
