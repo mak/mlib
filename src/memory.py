@@ -50,6 +50,29 @@ class M(object):
         self.b.seek(old_l, os.SEEK_SET)
         return r
 
+
+    def read_cstring_at(self, at, is_wide = False):
+        csize = 1 + int(is_wide) 
+        delim = "\x00" * csize
+        r = []  
+        i = 0 
+        l = self.b.tell()
+        self.b.seek(at, os.SEEK_SET)
+        t = ""
+
+        while t != delim:
+            t = self.b.read(csize)
+            r.append(t)
+        
+        r = ''.join(r)
+        self.b.seek(l, os.SEEK_SET)
+        return (r.decode('utf-16') if is_wide else r).strip("\x00")
+
+    def read_cstring(self, is_wide = False):
+        r = self.read_cstring_at(self.b.tell(), is_wide)
+        self.b.seek((len(r)+1) * (1 +  int(is_wide)), os.SEEK_CUR)
+        return r
+
     def read_struct_at(self, klass, at):
         d = self.read_at(at, get_size(klass))
         return klass.parse(d)
