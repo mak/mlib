@@ -87,7 +87,9 @@ class C(object):
         self.mnem = self.ins.mnemonic
         self.base = b
         self.operands = map(Op, self.ins.operands)
-
+        self.size  = self.ins.size
+        self.address = self.ins.address
+        
     def __str__(self):
         return "%s %s" % (self.mnem, self.ins.op_str)
 
