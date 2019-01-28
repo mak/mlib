@@ -3,6 +3,7 @@ import struct
 
 from . import lznt1 as _lznt1
 from . import aplib as _aplib
+from . import sfx as _sfx
 from mlib.misc import load_dll
 
 
@@ -54,3 +55,10 @@ class aplib:
     @classmethod
     def decompress(cls, data, s=0):
         return _aplib.decompress(data, s)
+
+class sfx:
+
+    @classmethod
+    def decompress(cls,data):
+        return _sfx.decompress(data)
+        
