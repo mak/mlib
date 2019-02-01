@@ -32,7 +32,7 @@ def dostime_to_date(dosdate):
     s = (time & 0x1F) << 1;
     if s == 60:
         s = 59
-    return datetime(year=y, month=m, day=d, hour=h, minute=mi, second=s)
+    return datetime.datetime(year=y, month=m, day=d, hour=h, minute=mi, second=s)
 
 
 
