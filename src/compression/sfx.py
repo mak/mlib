@@ -38,11 +38,11 @@ def decompress(data):
 		log.debug('[-] not an sfx archive (2)')
 		raise StopIteration
 
-	if data[idx+16:idx+18] != '7z':
+	data = data[idx+16:].lstrip()
+	if data[0:2] != '7z':
 		log.debug('[-] not an sfx archive (3)')	
 		raise StopIteration
 
-	data = data[idx+16:]
 	with libarchive.memory_reader(data) as archve:
 		for ent in archve:
 			e = sfx_ent(ent)
