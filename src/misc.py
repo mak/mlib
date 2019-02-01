@@ -14,12 +14,26 @@ import string
 import StringIO
 import random
 import hashlib
-
+import datetime
 #import log
 #log = log.get_logger(__name__)
 
 
 def chunks(l, n): return [l[x: x + n] for x in xrange(0, len(l), n)]
+
+def dostime_to_date(dosdate):
+    date = dosdate >> 16;
+    time = dosdate & 0xFFFF;
+    y = ((date & 0xFE00) >> 9) + 1980;
+    m = (date & 0x1E0) >> 5;
+    d = date & 0x1F;
+    h = (time & 0xF800) >> 11;
+    mi = (time & 0x7E0) >> 5;
+    s = (time & 0x1F) << 1;
+    if s == 60:
+        s = 59
+    return datetime(year=y, month=m, day=d, hour=h, minute=mi, second=s)
+
 
 
 BASEPATH = ''
@@ -33,7 +47,7 @@ def re_match(r, d, cstr):
 
 get_urls = lambda d, cstr=False: re_match("https?://[\x21-\x7e]{6,}", d, cstr)
 get_strings = lambda d, cstr=False: re_match('[ -~]{3,}', d, cstr)
-
+get_stringsW = lambda d, cstr=False: map(lambda x: x[0].decode('utf-16').strip("\x00"),re.findall(r'(([^\x00]\x00)+\x00\x00)', d + ("\x00\x00" if cstr else '')))
 
 class E(enum.Enum):
 
