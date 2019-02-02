@@ -59,6 +59,6 @@ class aplib:
 class sfx:
 
     @classmethod
-    def decompress(cls,data):
-        return _sfx.decompress(data)
+    def decompress(cls,data, unpack = False):
+        return _sfx.decompress(data, unpack)
         
