@@ -48,10 +48,11 @@ def rol(x, n, b=32):
     n = (b - 1) & n
     return x << n | 2 ** n - 1 & x >> b - n
 
-
-def chunks(data, n):
-    return [data[i * n:(i + 1) * n] for i in range(len(data) / n)]
-
-
 def ror(n, bits, b=32):
     return rol(n, b - bits, b)
+
+def byte0(x): return x & 0xff
+def byte1(x): return (x>>8) & 0xff
+def byte2(x): return (x>>16) & 0xff
+def byte3(x): return (x>>24) & 0xff
+
