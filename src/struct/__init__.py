@@ -57,3 +57,12 @@ class Structure(ctypes.Structure):
             else:
                 ret[field] = value
         return ret
+
+class BigEndianStructure(Structure):
+    
+    def __getattr__(self, name):
+        if not hasattr(self,'_fdict'):
+            self._fdict = dict(self._fields_)
+        if '_'+name in self._fdict:
+            return bswap32(getattr(self, '_'+name))
+        return self.__dict__[name]
