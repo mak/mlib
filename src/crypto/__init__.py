@@ -4,21 +4,38 @@ import itertools
 import sys
 import struct
 
-from ctypes import cdll, c_buffer
 from Crypto.Cipher import AES
 from Crypto.Cipher import ARC4 as RC4
 from Crypto.Cipher import PKCS1_v1_5
 from Crypto.PublicKey import RSA
 
-from mlib.misc import load_dll
+from mlib.misc import load_dll, chunks
 from mlib.bits import rol
 
 from . import rc6 as _rc6
 from . import rc2 as _rc2
 from . import spritz as _spritz
 from . import rabbit as _rabbit
+try:
+   from ctypes import c_buffer
+except ImportError:
+   ## Jython does'nt have it... so lets copy def from cpython
+   def create_string_buffer(init, size=None):
+       if isinstance(init, bytes):
+          if size is None:
+             size = len(init)+1
+          buftype = c_char * size
+          buf = buftype()
+          buf.value = init
+          return buf
+       elif isinstance(init, int):
+          buftype = c_char * init
+          buf = buftype()
+          return buf
+       raise TypeError(init)
 
-def chunks(l, n): return [l[x: x + n] for x in xrange(0, len(l), n)]
+   def c_buffer(init, size=None):
+       return create_string_buffer(init, size)
 
 
 def rsa(k):
@@ -56,7 +73,7 @@ class rc2:
 class aes:
 
     @classmethod
-    def decrypt(cls, d, k=None, _xor=None, mode='ecb', *rest):
+    def decrypt(cls, d, k=None, mode='ecb', _xor = None, *rest):
         if not k:
             k = cls.key
 
