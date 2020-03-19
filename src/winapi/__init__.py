@@ -1,6 +1,8 @@
 import os
 import pefile
-from mlib.winapi.hashdb import API_HASH
+import struct
+
+from mlib.winapi.hashdb import API_HASH, NAMES
 from mlib.misc import realdir
 
 '''
@@ -25,6 +27,10 @@ def resolve_hash(h):
             r = (t, API_HASH[t][h]['name'], API_HASH[t][h]['lib'])
             print 'type: %s api: %s dll: %s' % r
             yield r
+
+
+def make_hash_dict(func):
+    return dict(zip(map(func, NAMES), NAMES))
 
 
 def hash_imports(hashfun, path, data=None):
@@ -58,7 +64,7 @@ def hash_imports(hashfun, path, data=None):
         h = hashfun(dll_name.upper() + '.DLL')
 
     for entry in pe.DIRECTORY_ENTRY_EXPORT.symbols:
-        if entry.name != None:
+        if entry.name is not None:
             for n in [entry.name.lower(), entry.name.upper(), entry.name]:
                 h = hashfun(n)
                 ret[h] = n
@@ -86,3 +92,8 @@ def update_db(act, data, save=True):
 
     else:
         raise Exception('unknown action')
+
+
+def clsid_to_str(data):
+    d1, d2, d3, = struct.unpack('IHH', data[:8])
+    return "{{{:08X}-{:04X}-{:04X}-{}-{}}}".format(d1, d2, d3, data[8:10].encode('hex'), data[10:].encode('hex')).upper()
