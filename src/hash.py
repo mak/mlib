@@ -1,12 +1,8 @@
 import binascii
-from mlib.bits import rol
+from mlib.bits import rol, ror
 
 
 def mlwr_hash(name):
-    return rol7_hash(name)
-
-
-def rol7_xor_hash(name):
     x = 0
     for c in name:
         x = rol(x, 7)
@@ -17,11 +13,20 @@ def rol7_xor_hash(name):
 def ror7_hash(name):
     x = 0
     for c in name:
+        x = ror(x, 7) & 0xffffffff
+        x += ord(c)
+        x &= 0xffffffff
+    return x
+
+
+def rol7_hash(name):
+    x = 0
+    for c in name:
         x = rol(x, 7) & 0xffffffff
         x += ord(c)
         x &= 0xffffffff
     return x
-    
+
 
 def std_hash(name):
     x = 0
